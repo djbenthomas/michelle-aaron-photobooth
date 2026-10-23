@@ -308,6 +308,92 @@
   footer a { color: var(--sage-deep); text-decoration: none; font-weight: 500; }
   footer a:hover { text-decoration: underline; }
   .loading { text-align: center; padding: 60px 0; color: var(--ink-soft); }
+
+  /* ---------- Wedding film ---------- */
+  .film-section {
+    padding: 74px 20px 40px;
+    background: linear-gradient(180deg, #FBF8F1 0%, #F5EFE3 100%);
+  }
+  .film-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px;
+    max-width: 1000px; margin: 0 auto;
+  }
+  @media (max-width: 760px) { .film-grid { grid-template-columns: 1fr; gap: 22px; } }
+  .film-card {
+    background: #fff; border: 1px solid var(--gold-light); border-radius: 3px;
+    padding: 14px; box-shadow: 0 10px 30px rgba(183,147,90,.13);
+    transition: transform .3s ease, box-shadow .3s ease;
+  }
+  .film-card:hover { transform: translateY(-4px); box-shadow: 0 18px 44px rgba(183,147,90,.2); }
+  .film-frame {
+    position: relative; overflow: hidden; border-radius: 2px;
+    background: #2c2825; aspect-ratio: 16 / 9;
+  }
+  .film-frame img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: .94; }
+  .film-frame::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(58,53,50,0) 45%, rgba(58,53,50,.42) 100%);
+  }
+  .film-play {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    z-index: 2; border: 0; background: none; cursor: pointer;
+  }
+  .film-play span {
+    width: 62px; height: 62px; border-radius: 50%;
+    background: rgba(251,248,241,.94); color: var(--sage-deep);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; padding-left: 4px;
+    box-shadow: 0 8px 26px rgba(0,0,0,.28); transition: transform .25s, background .25s;
+  }
+  .film-card:hover .film-play span { transform: scale(1.08); background: #fff; }
+  .film-dur {
+    position: absolute; right: 12px; bottom: 10px; z-index: 3;
+    background: rgba(58,53,50,.72); color: #FBF8F1; font-size: 11.5px;
+    letter-spacing: 1.5px; padding: 4px 11px; border-radius: 999px;
+  }
+  .film-meta { padding: 20px 8px 8px; text-align: center; }
+  .film-meta h3 {
+    font-family: 'Great Vibes', cursive; font-weight: 400; font-size: 32px;
+    color: var(--sage-deep); line-height: 1.15; margin-bottom: 6px;
+  }
+  .film-meta p { color: var(--ink-soft); font-size: 14px; margin-bottom: 16px; min-height: 42px; }
+  .film-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .film-btn {
+    display: inline-block; padding: 10px 22px; border-radius: 999px;
+    font-size: 11.5px; letter-spacing: 1.6px; text-transform: uppercase;
+    text-decoration: none; font-weight: 500; transition: all .22s;
+    border: 1px solid var(--gold); color: var(--gold); background: #fff; cursor: pointer;
+  }
+  .film-btn:hover { background: var(--gold); color: #fff; }
+  .film-btn.primary { background: var(--sage-deep); border-color: var(--sage-deep); color: #fff; }
+  .film-btn.primary:hover { background: var(--sage); border-color: var(--sage); }
+  .film-btn[disabled] { opacity: .4; pointer-events: none; }
+  .film-note {
+    text-align: center; color: var(--ink-soft); font-size: 12.5px;
+    letter-spacing: .6px; margin: 30px auto 0; max-width: 620px;
+  }
+  /* film lightbox */
+  .film-modal {
+    position: fixed; inset: 0; z-index: 999; display: none;
+    background: rgba(28,25,22,.94); padding: 28px 18px;
+    align-items: center; justify-content: center;
+  }
+  .film-modal.open { display: flex; }
+  .film-modal-inner { width: min(1080px, 100%); }
+  .film-modal video, .film-modal iframe {
+    width: 100%; aspect-ratio: 16 / 9; border: 0; background: #000; border-radius: 3px; display: block;
+  }
+  .film-modal-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    color: #F5EFE3; padding: 12px 4px 0; font-size: 13px; letter-spacing: 1.4px;
+  }
+  .film-modal-bar button {
+    background: none; border: 1px solid rgba(251,248,241,.4); color: #FBF8F1;
+    border-radius: 999px; padding: 7px 18px; font-size: 11.5px; letter-spacing: 1.4px;
+    text-transform: uppercase; cursor: pointer;
+  }
+  .film-modal-bar button:hover { background: rgba(251,248,241,.14); }
+
 </style>
 </head>
 <body>
@@ -335,6 +421,27 @@
     <div class="loading">Gathering the memories…</div>
   </div>
 </section>
+
+
+<section class="film-section" id="film">
+  <div class="container">
+    <p class="kicker">Their Wedding Film</p>
+    <h2 class="section-title">The Day, In Motion</h2>
+    <p class="section-sub">Four moments from 9.19.26 &mdash; color-graded, ready to watch</p>
+    <div class="film-grid" id="filmGrid"></div>
+    <p class="film-note">Every film shot in 1080p. Tap Watch to play, or download the file and keep it.</p>
+  </div>
+</section>
+
+<div class="film-modal" id="filmModal" aria-hidden="true">
+  <div class="film-modal-inner">
+    <div id="filmPlayer"></div>
+    <div class="film-modal-bar">
+      <span id="filmModalTitle"></span>
+      <button type="button" id="filmClose">Close</button>
+    </div>
+  </div>
+</div>
 
 <section class="review-section" id="review">
   <h2>Had Fun in the Booth?</h2>
@@ -485,5 +592,77 @@
 
   render();
 </script>
+
+<script>
+/* ===== Wedding film player =====
+   Fill watch (YouTube ID or direct .mp4 URL) and download once hosted. */
+var FILMS = [
+  { title: 'The Ceremony', dur: '7:46', poster: 'posters/ceremony.jpg',
+    desc: 'The vows, the rings, and the moment it all became official.',
+    watch: 'videos/ceremony.mp4', download: 'videos/ceremony.mp4' },
+  { title: 'Cocktail Hour', dur: '5:53', poster: 'posters/cocktail.jpg',
+    desc: 'Guests arriving, drinks in hand, the day settling into a party.',
+    watch: 'videos/cocktail.mp4', download: 'videos/cocktail.mp4' },
+  { title: 'The Toasts', dur: '13:21', poster: 'posters/toast.jpg',
+    desc: 'The speeches — the laughs, the roasts, and the ones that got dusty.',
+    watch: 'videos/toasts.mp4', download: 'videos/toasts.mp4' },
+  { title: 'Reception Dancing', dur: '13:04', poster: 'posters/dancing.jpg',
+    desc: 'The floor packed from the first song to the last.',
+    watch: 'videos/dancing.mp4', download: 'videos/dancing.mp4' }
+];
+
+var filmGrid = document.getElementById('filmGrid');
+var filmModal = document.getElementById('filmModal');
+var filmPlayer = document.getElementById('filmPlayer');
+var filmModalTitle = document.getElementById('filmModalTitle');
+
+FILMS.forEach(function (film) {
+  var card = document.createElement('article');
+  card.className = 'film-card';
+  var hasWatch = !!film.watch;
+  card.innerHTML =
+    '<div class="film-frame">' +
+      '<img src="' + film.poster + '" alt="' + film.title + ' — Aaron & Michelle, 9.19.26" loading="lazy">' +
+      '<span class="film-dur">' + film.dur + '</span>' +
+      (hasWatch ? '<button class="film-play" type="button" aria-label="Watch ' + film.title + '"><span>▶</span></button>' : '') +
+    '</div>' +
+    '<div class="film-meta">' +
+      '<h3>' + film.title + '</h3>' +
+      '<p>' + film.desc + '</p>' +
+      '<div class="film-actions">' +
+        '<button class="film-btn primary" type="button"' + (hasWatch ? '' : ' disabled') + '>▶ Watch</button>' +
+        '<a class="film-btn" href="' + (film.download || '#') + '"' + (film.download ? ' download' : ' aria-disabled="true"') + '>⬇ Download</a>' +
+      '</div>' +
+    '</div>';
+  filmGrid.appendChild(card);
+  var opener = card.querySelector('.film-play');
+  var watchBtn = card.querySelector('.film-btn.primary');
+  function open() { if (!film.watch) return; openFilm(film); }
+  if (opener) opener.addEventListener('click', open);
+  watchBtn.addEventListener('click', open);
+});
+
+function openFilm(film) {
+  var src = film.watch;
+  var isYT = src.length === 11 && src.indexOf('/') === -1 && src.indexOf('.') === -1;
+  filmPlayer.innerHTML = isYT
+    ? '<iframe src="https://www.youtube.com/embed/' + src + '?rel=0&modestbranding=1&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen title="' + film.title + '"></iframe>'
+    : '<video src="' + src + '" controls playsinline preload="metadata"></video>';
+  filmModalTitle.textContent = film.title + ' — 9.19.26';
+  filmModal.classList.add('open');
+  filmModal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+function closeFilm() {
+  filmModal.classList.remove('open');
+  filmModal.setAttribute('aria-hidden', 'true');
+  filmPlayer.innerHTML = '';
+  document.body.style.overflow = '';
+}
+document.getElementById('filmClose').addEventListener('click', closeFilm);
+filmModal.addEventListener('click', function (e) { if (e.target === filmModal) closeFilm(); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeFilm(); });
+</script>
+
 </body>
 </html>
